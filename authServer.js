@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt")
 require("dotenv").config();
 
+const connection = require("./app/connection/connection");
+
 const app = express();
 app.use(express.json());
 
@@ -21,10 +23,10 @@ app.post("/users/login", async (req, res) => {
       const accessToken = jwt.sign({username: exists.name}, process.env.ACCESS_TOKEN_SECRET);
       res.json({accessToken});
     } else {
-      res.send("Denied");
+      res.sendStatus(401);
     }
   } catch (e) {
-    res.status(500).send(e)
+    res.sendStatus(500);
   }
 
   const username = req.body.username;
@@ -33,17 +35,27 @@ app.post("/users/login", async (req, res) => {
 
 app.post("/users/register", async (req, res) => {
   try {
-    const hashPass = await bcrypt.hash(req.body.password, 10)
-    const exists = users.find(user => user.username = req.body.username);
-    const user = exists ?  null : {name: req.body.username, password: hashPass};
-    if (user) {
-      users.push(user)
-      res.status(201).send("Success");
-    } else {
-      res.status(409).send("User already exists")
-    }
+    const exists = connection.query(`SELECT id FROM Users WHERE username="${req.body.username}"`, async (err, result, field) => {
+      if (err) {
+        res.sendStatus(503);
+      }
+      if (result.length) {
+        res.sendStatus(409);
+      } else {
+        const hashPass = await bcrypt.hash(req.body.password, 10);
+        var sql = `INSERT INTO Users (username, password, name, email) VALUES ("${req.body.username}", "${hashPass}", "${req.body.name}", "${req.body.email}")`
+        connection.query(sql, (err, result) => {
+          if (err) {
+            console.log(err);
+            res.sendStatus(500);
+          } else {
+            res.sendStatus(201);
+          }
+        })
+      }
+    })
   } catch {
-    res.status(500).send("Error");
+    res.sendStatus(500);
   }
 })
 
