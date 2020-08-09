@@ -4,8 +4,7 @@
   "description": "Backend Server for FindMyRoute",
   "main": "index.js",
   "scripts": {
-    "runAuth": "nodemon authServer.js",
-    "runServer": "nodemon server.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Isaiah Chen",
