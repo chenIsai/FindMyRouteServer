@@ -1,8 +1,9 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt")
-const decode = require("jwt-decode");
 require("dotenv").config();
+
+const connection = require("./app/connection/connection");
 
 const app = express();
 app.use(express.json());
@@ -21,7 +22,27 @@ const users = [
 ];
 
 app.get("/users", authenticateToken, (req, res) => {
-  res.json(users.filter(user => user.username === req.user.username))
+  try {
+    connection.query(`SELECT * FROM Users WHERE id="${req.user.id}"`, (err, result, field) => {
+      console.log(err);
+      if (err) {
+        res.sendStatus(503);
+      }
+      if (!result.length) {
+        // Could not find user
+        res.sendStatus(404);
+      } else {
+        payload = {
+          name: result[0].name,
+          email: result[0].email,
+          username: result[0].username,
+        };
+        res.status(200).json(payload);
+      }
+    })
+  } catch (e) {
+    res.status(500).send(e);
+  }
 })
 
 function authenticateToken(req, res, next) {
@@ -36,8 +57,6 @@ function authenticateToken(req, res, next) {
     if (err) {
       return res.sendStatus(403)
     }
-    console.log("SEPARATOR");
-    console.log(decode(authHeader));
     req.user = user;
     next();
   })
