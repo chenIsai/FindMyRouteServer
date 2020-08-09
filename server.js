@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt")
+const decode = require("jwt-decode");
 require("dotenv").config();
 
 const app = express();
@@ -35,7 +36,8 @@ function authenticateToken(req, res, next) {
     if (err) {
       return res.sendStatus(403)
     }
-    console.log(user);
+    console.log("SEPARATOR");
+    console.log(decode(authHeader));
     req.user = user;
     next();
   })
