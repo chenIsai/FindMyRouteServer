@@ -1,50 +1,77 @@
-const express = require("express");
+const connection = require("../connection/connection");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-const connection = require("./app/connection/connection");
 
-const app = express();
-app.use(express.json());
+module.exports.authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
-const port = 4000;
+  if (token == null) {
+    return res.sendStatus(401)
+  }
 
-const users = [];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      return res.sendStatus(403)
+    }
+    req.user = user;
+    next();
+  })
+}
 
-app.post("/users/login", async (req, res) => {
+module.exports.getUser = (req, res) => {
+  try {
+    connection.query(`SELECT * FROM Users WHERE id="${req.user.id}"`, (err, result, field) => {
+      if (err) {
+        res.sendStatus(503);
+      }
+      if (!result.length) {
+        // Could not find user
+        res.sendStatus(404);
+      } else {
+        payload = {
+          name: result[0].name,
+          email: result[0].email,
+          username: result[0].username,
+        };
+        res.status(200).json(payload);
+      }
+    })
+  } catch (e) {
+    res.status(500).send(e);
+  }
+}
+
+module.exports.login = async (req, res) => {
   try {
     // Get hashed password to compare
     connection.query(`SELECT password, id FROM Users WHERE username="${req.body.username}"`, async (err, result, field) => {
       if (err) {
-        // Could not connect to Database
-        res.sendStatus(503);
+        res.sendStatus(503); // Could not connect to Database
       }
       if (!result.length) {
-        // Username undefined
-        res.sendStatus(404);
+        res.sendStatus(404); // Username undefined
       } else {
         // If valid password, return payload
         if (await bcrypt.compare(req.body.password, result[0].password)) {
           payload = {
             id: result[0].id,
           };
-          console.log(payload);
           accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
           res.status(200).json({accessToken});
         } else {
-          // Invalid password
-          res.sendStatus(401);
+          res.sendStatus(401); // Invalid password
         }
       }
     });
   } catch {
-    // Could not connect
-    res.sendStatus(500);
+    res.sendStatus(500); // Could not connect
   }
-})
+}
 
-app.post("/users/register", async (req, res) => {
+module.exports.register = async (req, res) => {
   try {
     // Check if username has already been used
     connection.query(`SELECT id FROM Users WHERE username="${req.body.username}"`, async (err, result, field) => {
@@ -74,9 +101,4 @@ app.post("/users/register", async (req, res) => {
     // Could not connect
     res.sendStatus(500);
   }
-})
-
-
-app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`)
-})
+}
