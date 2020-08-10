@@ -40,8 +40,10 @@ module.exports.refreshToken = (req, res) => {
         if (err) {
           res.sendStatus(403);
         }
+        connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`);
         const accessToken = generateAccessToken({id: user.id});
-        res.status(200).json({accessToken});
+        const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "7d"});
+        res.status(200).json({accessToken, refreshToken});
       })
     }
   })
@@ -87,7 +89,7 @@ module.exports.login = async (req, res) => {
             id: result.rows[0].id,
           };
           const accessToken = generateAccessToken(payload);
-          const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET);
+          const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "7d"});
           connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`, (err, result) => {
             if (err) {
               res.sendStatus(503);
