@@ -1,20 +1,12 @@
-const mysql = require("mysql");
 require("dotenv").config();
 
-var connection = mysql.createConnection({
+const Pool = require("pg").Pool
+const connection = new Pool({
+  user: "api",
   host: process.env.HOST_URL,
-  user: process.env.SQL_USER,
+  database: process.env.SQL_DATABASE,
   password: process.env.SQL_PASSWORD,
-  database: "findmyroute",
-  multipleStatements : true
-})
-
-connection.connect((err) => {
-  if (err) {
-    console.log(err);
-    return;
-  }
-  console.log("Success");
+  port: 5432,
 });
 
 module.exports = connection;

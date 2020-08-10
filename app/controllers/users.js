@@ -29,11 +29,11 @@ module.exports.refreshToken = (req, res) => {
   if (!token) {
     return res.sendStatus(401);
   }
-  connection.query(`SELECT * FROM RefreshTokens WHERE value="${token}"`, (err, result) => {
+  connection.query(`SELECT * FROM RefreshTokens WHERE value = '${token}'`, (err, result) => {
     if (err) {
       res.sendStatus(500);
     }
-    if (!result.length) {
+    if (!result.rows.length) {
     res.sendStatus(403);
     } else {
       jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
@@ -50,18 +50,18 @@ module.exports.refreshToken = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   try {
-    connection.query(`SELECT * FROM Users WHERE id="${req.user.id}"`, (err, result, field) => {
+    connection.query(`SELECT * FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503);
       }
-      if (!result.length) {
+      if (!result.rows.length) {
         // Could not find user
         res.sendStatus(404);
       } else {
         payload = {
-          name: result[0].name,
-          email: result[0].email,
-          username: result[0].username,
+          name: result.rows[0].name,
+          email: result.rows[0].email,
+          username: result.rows[0].username,
         };
         res.status(200).json(payload);
       }
@@ -74,21 +74,21 @@ module.exports.getUser = (req, res) => {
 module.exports.login = async (req, res) => {
   try {
     // Get hashed password to compare
-    connection.query(`SELECT password, id FROM Users WHERE username="${req.body.username}"`, async (err, result, field) => {
+    connection.query(`SELECT password, id FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
       }
-      if (!result.length) {
+      if (!result.rows.length) {
         res.sendStatus(404); // Username undefined
       } else {
         // If valid password, return payload
-        if (await bcrypt.compare(req.body.password, result[0].password)) {
+        if (await bcrypt.compare(req.body.password, result.rows[0].password)) {
           payload = {
-            id: result[0].id,
+            id: result.rows[0].id,
           };
           const accessToken = generateAccessToken(payload);
           const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET);
-          connection.query(`INSERT INTO RefreshTokens (value) VALUES ("${refreshToken}")`, (err, result) => {
+          connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`, (err, result) => {
             if (err) {
               res.sendStatus(503);
             }
@@ -107,16 +107,16 @@ module.exports.login = async (req, res) => {
 module.exports.register = async (req, res) => {
   try {
     // Check if username has already been used
-    connection.query(`SELECT id FROM Users WHERE username="${req.body.username}"`, async (err, result, field) => {
+    connection.query(`SELECT id FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
       }
-      if (result.length) {
+      if (result.rows.length) {
         res.sendStatus(409); // User already exists
       } else {
         // If non-existent, create new entry with req.body
         const hashPass = await bcrypt.hash(req.body.password, 10);
-        var sql = `INSERT INTO Users (username, password, name, email) VALUES ("${req.body.username}", "${hashPass}", "${req.body.name}", "${req.body.email}")`
+        var sql = `INSERT INTO Users (username, password, name, email) VALUES ('${req.body.username}', '${hashPass}', '${req.body.name}', '${req.body.email}')`
         connection.query(sql, (err, result) => {
           if (err) {
             res.sendStatus(500); // Error inserting user
@@ -138,7 +138,7 @@ module.exports.logout = (req, res) => {
     if (!token) {
       res.sendStatus(200);
     }
-    connection.query(`DELETE FROM RefreshTokens WHERE value="${token}"`, (err, result) => {
+    connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`, (err, result) => {
       if (err) {
         res.sendStatus(401);
       }
