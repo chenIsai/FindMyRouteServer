@@ -4,7 +4,11 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const generateAccessToken = (user) => {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1800s"})
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1800s"});
+}
+
+const generateRefreshToken = (user) => {
+  return jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "7d"});
 }
 
 module.exports.authenticateToken = (req, res, next) => {
@@ -41,8 +45,9 @@ module.exports.refreshToken = (req, res) => {
           res.sendStatus(403);
         }
         connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`);
-        const accessToken = generateAccessToken({id: user.id});
-        const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "7d"});
+        cosnt payload = {username: user.username}
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
         res.status(200).json({accessToken, refreshToken});
       })
     }
@@ -62,7 +67,6 @@ module.exports.getUser = (req, res) => {
       } else {
         payload = {
           name: result.rows[0].name,
-          email: result.rows[0].email,
           username: result.rows[0].username,
         };
         res.status(200).json(payload);
@@ -76,7 +80,7 @@ module.exports.getUser = (req, res) => {
 module.exports.login = async (req, res) => {
   try {
     // Get hashed password to compare
-    connection.query(`SELECT password, id FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
+    connection.query(`SELECT password FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
       }
@@ -86,10 +90,10 @@ module.exports.login = async (req, res) => {
         // If valid password, return payload
         if (await bcrypt.compare(req.body.password, result.rows[0].password)) {
           payload = {
-            id: result.rows[0].id,
+            id: result.rows[0].username,
           };
           const accessToken = generateAccessToken(payload);
-          const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {expiresIn: "7d"});
+          const refreshToken = generateRefreshToken(payload);
           connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`, (err, result) => {
             if (err) {
               res.sendStatus(503);
@@ -118,11 +122,14 @@ module.exports.register = async (req, res) => {
       } else {
         // If non-existent, create new entry with req.body
         const hashPass = await bcrypt.hash(req.body.password, 10);
-        var sql = `INSERT INTO Users (username, password, name, email) VALUES ('${req.body.username}', '${hashPass}', '${req.body.name}', '${req.body.email}')`
+        var sql = `INSERT INTO Users (username, password, name) VALUES ('${req.body.username}', '${hashPass}', '${req.body.name}')`
         connection.query(sql, (err, result) => {
           if (err) {
             res.sendStatus(500); // Error inserting user
           } else {
+            const payload = {username: req.body.username};
+            const accessToken = generateAccessToken(payload);
+            const
             res.sendStatus(201); // Successfully added
           }
         })
