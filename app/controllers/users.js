@@ -129,8 +129,8 @@ module.exports.register = async (req, res) => {
           } else {
             const payload = {username: req.body.username};
             const accessToken = generateAccessToken(payload);
-            const
-            res.sendStatus(201); // Successfully added
+            const refreshToken = generateRefreshToken(payload);
+            res.status(201).json({accessToken, refreshToken}); // Successfully added
           }
         })
       }
