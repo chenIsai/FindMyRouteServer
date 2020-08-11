@@ -45,7 +45,7 @@ module.exports.refreshToken = (req, res) => {
           res.sendStatus(403);
         }
         connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`);
-        cosnt payload = {username: user.username}
+        const payload = {username: user.username}
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
         res.status(200).json({accessToken, refreshToken});
