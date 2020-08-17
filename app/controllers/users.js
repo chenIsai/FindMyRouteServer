@@ -36,13 +36,16 @@ module.exports.refreshToken = (req, res) => {
   connection.query(`SELECT * FROM RefreshTokens WHERE value = '${token}'`, (err, result) => {
     if (err) {
       res.sendStatus(500);
+      return;
     }
     if (!result.rows.length) {
     res.sendStatus(403);
+    return;
     } else {
       jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) {
           res.sendStatus(403);
+          return;
         }
         connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`);
         const payload = {username: user.username}
@@ -61,6 +64,7 @@ module.exports.getUser = (req, res) => {
     connection.query(`SELECT * FROM Users WHERE username = '${req.user.username}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503);
+        return;
       }
       if (!result.rows || !result.rows.length) {
         // Could not find user
@@ -84,9 +88,11 @@ module.exports.login = async (req, res) => {
     connection.query(`SELECT password FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
+        return;
       }
       if (!result.rows.length) {
         res.sendStatus(404); // Username undefined
+        return;
       } else {
         // If valid password, return payload
         if (await bcrypt.compare(req.body.password, result.rows[0].password)) {
@@ -98,6 +104,7 @@ module.exports.login = async (req, res) => {
           connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`, (err, result) => {
             if (err) {
               res.sendStatus(503);
+              return;
             }
           });
           res.status(200).json({accessToken, refreshToken});
@@ -117,9 +124,11 @@ module.exports.register = async (req, res) => {
     connection.query(`SELECT id FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
+        return;
       }
       if (result.rows.length) {
         res.sendStatus(409); // User already exists
+        return;
       } else {
         // If non-existent, create new entry with req.body
         const hashPass = await bcrypt.hash(req.body.password, 10);
@@ -147,10 +156,12 @@ module.exports.logout = (req, res) => {
     const token = req.body.token;
     if (!token) {
       res.sendStatus(200);
+      return;
     }
     connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`, (err, result) => {
       if (err) {
         res.sendStatus(401);
+        return;
       }
       res.sendStatus(200);
     })
