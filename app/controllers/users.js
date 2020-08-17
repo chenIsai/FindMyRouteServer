@@ -48,7 +48,7 @@ module.exports.refreshToken = (req, res) => {
         const payload = {username: user.username}
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
-        cconnection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`);
+        connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`);
         res.status(200).json({accessToken, refreshToken});
       })
     }
