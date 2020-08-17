@@ -62,7 +62,7 @@ module.exports.getUser = (req, res) => {
       if (err) {
         res.sendStatus(503);
       }
-      if (if (!result.rows || !result.rows.length) {
+      if (!result.rows || !result.rows.length) {
         // Could not find user
         res.sendStatus(404);
       } else {
