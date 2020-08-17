@@ -1,3 +1,20 @@
+module.exports.authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (token == null) {
+    return res.sendStatus(401)
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      return res.sendStatus(403)
+    }
+    req.user = user;
+    next();
+  })
+}
+
 module.exports.saveRoute = (req, res) => {
   try {
     const token = req.body.token;
@@ -8,7 +25,7 @@ module.exports.saveRoute = (req, res) => {
       if (err) {
         return res.sendStatus(403);
       }
-      connection.query(`INSERT INTO Routes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.name}', '${req.distance}', '${user.description}', '${req.markers}', '${req.route}'`);
+      connection.query(`INSERT INTO Routes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.name}', '${req.distance}', '${req.description}', '${req.markers}', '${req.route}'`);
     })
   } catch {
     res.sendStatus(500);
