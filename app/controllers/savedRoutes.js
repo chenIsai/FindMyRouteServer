@@ -17,7 +17,9 @@ module.exports.saveRoute = (req, res) => {
       connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`, (err) => {
         if (err) {
           res.sendStatus(400);
+          return;
         }
+        res.sendStatus(200);
       });
     })
   } catch {
