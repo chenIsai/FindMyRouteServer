@@ -11,10 +11,10 @@ module.exports.saveRoute = (req, res) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        res.sendStatus(403);
+        res.status(403).send(err);
         return;
       }
-      connection.query(`INSERT INTO Routes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.name}', '${req.distance}', '${req.description}', '${req.markers}', '${req.route}'`);
+      connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.name}', '${req.distance}', '${req.description}', '${req.markers}', '${req.route}'`);
     })
   } catch {
     res.sendStatus(500);
