@@ -58,11 +58,11 @@ module.exports.refreshToken = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   try {
-    connection.query(`SELECT * FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
+    connection.query(`SELECT * FROM Users WHERE username = '${req.user.username}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503);
       }
-      if (!result.rows.length) {
+      if (if (!result.rows || !result.rows.length) {
         // Could not find user
         res.sendStatus(404);
       } else {
