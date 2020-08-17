@@ -3,12 +3,12 @@ module.exports.authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null) {
-    return res.sendStatus(401)
+    res.sendStatus(401)
   }
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.sendStatus(403)
+      res.sendStatus(403)
     }
     req.user = user;
     next();
@@ -23,7 +23,7 @@ module.exports.saveRoute = (req, res) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.sendStatus(403);
+        res.sendStatus(403);
       }
       connection.query(`INSERT INTO Routes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.name}', '${req.distance}', '${req.description}', '${req.markers}', '${req.route}'`);
     })
@@ -40,7 +40,7 @@ module.exports.getRoutes = (req, res) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.sendStatus(403);
+        res.sendStatus(403);
       }
       connection.query(`SELECT route FROM Routes WHERE username = '${user.username}'`, (err, result, field) => {
         if (err) {
@@ -62,7 +62,7 @@ module.exports.deleteRoute = (req, res) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
-        return res.sendStatus(403);
+        res.sendStatus(403);
       }
       const sql = `DELETE FROM Routes WHERE owned_by = '${user.username}' AND name = '${req.name}'`
       connection.query(sql);

@@ -48,6 +48,7 @@ module.exports.refreshToken = (req, res) => {
         const payload = {username: user.username}
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
+        cconnection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`);
         res.status(200).json({accessToken, refreshToken});
       })
     }
@@ -90,7 +91,7 @@ module.exports.login = async (req, res) => {
         // If valid password, return payload
         if (await bcrypt.compare(req.body.password, result.rows[0].password)) {
           payload = {
-            id: result.rows[0].username,
+            username: result.rows[0].username,
           };
           const accessToken = generateAccessToken(payload);
           const refreshToken = generateRefreshToken(payload);
