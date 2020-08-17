@@ -93,7 +93,7 @@ module.exports.login = async (req, res) => {
         // If valid password, return payload
         if (await bcrypt.compare(req.body.password, result.rows[0].password)) {
           payload = {
-            username: result.rows[0].username,
+            username: req.body.username,
           };
           const accessToken = generateAccessToken(payload);
           const refreshToken = generateRefreshToken(payload);
