@@ -4,6 +4,7 @@ require("dotenv").config();
 
 module.exports.saveRoute = (req, res) => {
   try {
+    console.log(req);
     const token = req.body.token;
     if (!token) {
       res.sendStatus(401);
