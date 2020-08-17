@@ -14,7 +14,7 @@ module.exports.saveRoute = (req, res) => {
         res.status(403).send(err);
         return;
       }
-      connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.name}', '${req.distance}', '${req.description}', '${req.markers}', '${req.route}')`, (err) => {
+      connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`, (err) => {
         if (err) {
           res.sendStatus(400);
         }
