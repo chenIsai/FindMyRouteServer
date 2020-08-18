@@ -51,7 +51,7 @@ module.exports.getRoutes = (req, res) => {
         res.sendStatus(503);
         return;
       }
-      res.status(200).json(result);
+      res.status(200).json(result.rows);
     });
   } catch {
     res.sendStatus(500);
@@ -70,7 +70,7 @@ module.exports.deleteRoute = (req, res) => {
         res.sendStatus(403);
         return;
       }
-      const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${user.username}' AND name = '${req.name}'`
+      const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${user.username}' AND name = '${req.body.name}'`
       connection.query(sql);
       res.sendStatus(200);
     })
