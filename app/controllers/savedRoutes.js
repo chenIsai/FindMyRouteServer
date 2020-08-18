@@ -51,7 +51,7 @@ module.exports.getRoutes = (req, res) => {
         res.sendStatus(503);
         return;
       }
-      res.sendStatus(200).json(result);
+      res.status(200).json(result);
     });
   } catch {
     res.sendStatus(500);
