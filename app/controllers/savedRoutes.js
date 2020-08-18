@@ -46,7 +46,7 @@ module.exports.saveRoute = (req, res) => {
 
 module.exports.getRoutes = (req, res) => {
   try {
-    connection.query(`SELECT route FROM Routes WHERE username = '${req.user.username}'`, (err, result, field) => {
+    connection.query(`SELECT * FROM SavedRoutes WHERE owned_by = '${req.user.username}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503);
         return;
@@ -70,7 +70,7 @@ module.exports.deleteRoute = (req, res) => {
         res.sendStatus(403);
         return;
       }
-      const sql = `DELETE FROM Routes WHERE owned_by = '${user.username}' AND name = '${req.name}'`
+      const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${user.username}' AND name = '${req.name}'`
       connection.query(sql);
       res.sendStatus(200);
     })
@@ -91,7 +91,7 @@ module.exports.deleteRoute = (req, res) => {
 //         res.sendStatus(403);
 //         return;
 //       }
-//       const sql = `DELETE FROM ROUTES WHERE owned_by= '${user.username}'`;
+//       const sql = `DELETE FROM SavedRoutes WHERE owned_by= '${user.username}'`;
 //       connection.query(sql);
 //       res.sendStatus(200);
 //     })
