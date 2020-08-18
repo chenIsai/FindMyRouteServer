@@ -2,6 +2,23 @@ const connection = require("../connection/connection");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+module.exports.authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (token == null) {
+    return res.sendStatus(401)
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      return res.sendStatus(403)
+    }
+    req.user = user;
+    next();
+  })
+}
+
 module.exports.saveRoute = (req, res) => {
   try {
     const token = req.body.token;
@@ -29,23 +46,12 @@ module.exports.saveRoute = (req, res) => {
 
 module.exports.getRoutes = (req, res) => {
   try {
-    const token = req.body.token;
-    if (!token) {
-      res.sendStatus(401);
-      return;
-    }
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    connection.query(`SELECT route FROM Routes WHERE username = '${req.user.username}'`, (err, result, field) => {
       if (err) {
-        res.sendStatus(403);
+        res.sendStatus(503);
         return;
       }
-      connection.query(`SELECT route FROM Routes WHERE username = '${user.username}'`, (err, result, field) => {
-        if (err) {
-          res.sendStatus(503);
-          return;
-        }
-        res.sendStatus(200).json(result);
-      });
+      res.sendStatus(200).json(result);
     });
   } catch {
     res.sendStatus(500);
@@ -72,3 +78,24 @@ module.exports.deleteRoute = (req, res) => {
     res.sendStatus(500);
   }
 }
+//
+// module.exports.deleteALL = (req, res) => {
+//   try {
+//     const token = req.body.token;
+//     if (!token) {
+//       res.sendStatus(401);
+//       return;
+//     }
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+//       if (err) {
+//         res.sendStatus(403);
+//         return;
+//       }
+//       const sql = `DELETE FROM ROUTES WHERE owned_by= '${user.username}'`;
+//       connection.query(sql);
+//       res.sendStatus(200);
+//     })
+//   } catch {
+//     res.sendStatus(500);
+//   }
+// }
