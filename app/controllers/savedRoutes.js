@@ -22,7 +22,7 @@ module.exports.authenticateToken = (req, res, next) => {
 module.exports.saveRoute = (req, res) => {
   try {
     const token = req.body.token;
-    const exists = false;
+    var exists = false;
     if (!token) {
       res.sendStatus(401);
       return;
