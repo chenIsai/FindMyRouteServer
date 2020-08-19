@@ -22,6 +22,7 @@ module.exports.authenticateToken = (req, res, next) => {
 module.exports.saveRoute = (req, res) => {
   try {
     const token = req.body.token;
+    const exists = false;
     if (!token) {
       res.sendStatus(401);
       return;
@@ -32,24 +33,25 @@ module.exports.saveRoute = (req, res) => {
         return;
       }
       connection.query(`SELECT name FROM SavedRoutes WHERE owned_by = '${user.username}' AND name = '${req.body.name}'`, (err, result, field) => {
-        console.log(result.rows);
         if (err) {
           res.status(400).send(err);
           return;
         }
         if (result.rows.length) {
           res.sendStatus(409); // Route name already exists
+          exists = true;
           return;
         }
       });
-
-      connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`, (err) => {
-        if (err) {
-          res.sendStatus(400);
-          return;
-        }
-        res.sendStatus(200);
-      });
+      if (!exists) {
+        connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`, (err) => {
+          if (err) {
+            res.sendStatus(400);
+            return;
+          }
+          res.sendStatus(200);
+        });
+      }
     })
   } catch {
     res.sendStatus(500);
