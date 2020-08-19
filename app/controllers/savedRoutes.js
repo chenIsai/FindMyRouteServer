@@ -130,8 +130,8 @@ module.exports.edit = (req, res) => {
           return;
         }
         res.sendStatus(200);
-      }
-    })
+      });
+    });
   } catch {
     res.sendStatus(500);
   }
