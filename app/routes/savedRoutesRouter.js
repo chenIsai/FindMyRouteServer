@@ -8,5 +8,6 @@ router.get("/", controller.authenticateToken, controller.getRoutes);
 router.post("/", controller.saveRoute);
 router.delete("/", controller.deleteRoute);
 router.delete("/clear", controller.deleteALL);
+router.post("/edit", controller.edit);
 
 module.exports = router;

@@ -122,13 +122,22 @@ module.exports.edit = (req, res) => {
         res.sendStatus(403);
         return;
       }
-      const sql = `UPDATE SavedRoutes SET description = '${req.body.description}', name = '${req.body.name}' WHERE owned_by = '${user.username}' AND name = '${req.body.oldName}'`;
-      connection.query(sql, (err, result, field) => {
+      connection.query(`SELECT name FROM SavedRoutes WHERE owned_by = '${user.username}' AND name = '${req.body.oldName}'`, (err, result, field) => {
         if (err) {
-          res.sendStatus(503);
+          res.sendStatus(400);
           return;
         }
-        res.sendStatus(200);
+        if (!result.rows.length) {
+          res.sendStatus(404);
+        }
+        const sql = `UPDATE SavedRoutes SET description = '${req.body.description}', name = '${req.body.name}' WHERE owned_by = '${user.username}' AND name = '${req.body.oldName}'`;
+        connection.query(sql, (err, result, field) => {
+          if (err) {
+            res.sendStatus(503);
+            return;
+          }
+          res.sendStatus(200);
+        });
       });
     });
   } catch {
