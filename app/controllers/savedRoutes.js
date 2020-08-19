@@ -32,6 +32,7 @@ module.exports.saveRoute = (req, res) => {
         return;
       }
       connection.query(`SELECT name FROM SavedRoutes WHERE owned_by = '${user.username} AND name = ${req.body.name}'`, (err, result, field) => {
+        console.log(result.rows);
         if (err) {
           res.status(400).send(err);
           return;
