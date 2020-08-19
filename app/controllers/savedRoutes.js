@@ -71,7 +71,7 @@ module.exports.deleteRoute = (req, res) => {
 
 module.exports.deleteALL = (req, res) => {
   try {
-    const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${user.username}'`;
+    const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${req.user.username}'`;
     connection.query(sql);
     res.sendStatus(200);
   } catch {
@@ -81,7 +81,7 @@ module.exports.deleteALL = (req, res) => {
 
 module.exports.edit = (req, res) => {
   try {
-    connection.query(`SELECT name FROM SavedRoutes WHERE owned_by = '${user.username}' AND name = '${req.body.oldName}'`, (err, result, field) => {
+    connection.query(`SELECT name FROM SavedRoutes WHERE owned_by = '${req.user.username}' AND name = '${req.body.oldName}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(400);
         return;
@@ -90,7 +90,7 @@ module.exports.edit = (req, res) => {
         res.sendStatus(404);
         return;
       }
-      const sql = `UPDATE SavedRoutes SET description = '${req.body.description}', name = '${req.body.name}' WHERE owned_by = '${user.username}' AND name = '${req.body.oldName}'`;
+      const sql = `UPDATE SavedRoutes SET description = '${req.body.description}', name = '${req.body.name}' WHERE owned_by = '${req.user.username}' AND name = '${req.body.oldName}'`;
       connection.query(sql, (err, result, field) => {
         if (err) {
           res.sendStatus(503);
