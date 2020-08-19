@@ -31,6 +31,17 @@ module.exports.saveRoute = (req, res) => {
         res.status(403).send(err);
         return;
       }
+      connection.query(`SELECT name FROM SavedRoutes WHERE owned_by = '${user.username} AND name = ${req.body.name}'`, (err, result, field) => {
+        if (err) {
+          res.status(400).send(err);
+          return;
+        }
+        if (result.rows.length) {
+          res.sendStatus(409); // Route name already exists
+          return;
+        }
+      });
+
       connection.query(`INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`, (err) => {
         if (err) {
           res.sendStatus(400);
@@ -94,6 +105,32 @@ module.exports.deleteALL = (req, res) => {
       const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${user.username}'`;
       connection.query(sql);
       res.sendStatus(200);
+    })
+  } catch {
+    res.sendStatus(500);
+  }
+}
+
+module.exports.edit = (req, res) => {
+  try {
+    const token = req.body.token;
+    if (!token) {
+      res.sendStatus(401);
+      return;
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      if (err) {
+        res.sendStatus(403);
+        return;
+      }
+      const sql = `UPDATE SavedRoutes SET description = '${req.body.description}', name = '${req.body.name}' WHERE owned_by = '${user.username}' AND name = '${req.body.oldName}'`;
+      connection.query(sql, (err, result, field) => {
+        if (err) {
+          res.sendStatus(503);
+          return;
+        }
+        res.sendStatus(200);
+      }
     })
   } catch {
     res.sendStatus(500);
