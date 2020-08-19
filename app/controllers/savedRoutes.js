@@ -78,24 +78,24 @@ module.exports.deleteRoute = (req, res) => {
     res.sendStatus(500);
   }
 }
-//
-// module.exports.deleteALL = (req, res) => {
-//   try {
-//     const token = req.body.token;
-//     if (!token) {
-//       res.sendStatus(401);
-//       return;
-//     }
-//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-//       if (err) {
-//         res.sendStatus(403);
-//         return;
-//       }
-//       const sql = `DELETE FROM SavedRoutes WHERE owned_by= '${user.username}'`;
-//       connection.query(sql);
-//       res.sendStatus(200);
-//     })
-//   } catch {
-//     res.sendStatus(500);
-//   }
-// }
+
+module.exports.deleteALL = (req, res) => {
+  try {
+    const token = req.body.token;
+    if (!token) {
+      res.sendStatus(401);
+      return;
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      if (err) {
+        res.sendStatus(403);
+        return;
+      }
+      const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${user.username}'`;
+      connection.query(sql);
+      res.sendStatus(200);
+    })
+  } catch {
+    res.sendStatus(500);
+  }
+}
