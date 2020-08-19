@@ -4,7 +4,8 @@ const controller = require("../controllers/savedRoutes");
 const router = express.Router();
 
 router.use(express.json());
-router.get("/", controller.authenticateToken, controller.getRoutes);
+router.use(controller.authenticateToken);
+router.get("/", controller.getRoutes);
 router.post("/", controller.saveRoute);
 router.delete("/", controller.deleteRoute);
 router.delete("/clear", controller.deleteALL);
