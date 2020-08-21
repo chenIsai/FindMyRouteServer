@@ -63,6 +63,7 @@ module.exports.deleteRoute = (req, res) => {
   try {
     const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${req.user.username}' AND name = '${req.body.name}'`
     connection.query(sql);
+    connection.query(`UPDATE Users SET total_routes = total_routes + 1 WHERE username = '${req.user.username}'`);
     res.sendStatus(200);
   } catch {
     res.sendStatus(500);
@@ -73,6 +74,7 @@ module.exports.deleteALL = (req, res) => {
   try {
     const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${req.user.username}'`;
     connection.query(sql);
+    connection.query(`UPDATE Users SET total_routes = 0 WHERE username = '${req.user.username}'`);
     res.sendStatus(200);
   } catch {
     res.sendStatus(500);

@@ -169,3 +169,53 @@ module.exports.logout = (req, res) => {
     res.sendStatus(500);
   }
 }
+
+module.exports.changeUsername = async (req, res) => {
+  try {
+    // Check if username has already been used
+    connection.query(`SELECT id FROM Users WHERE username = '${req.body.oldUser}'`, async (err, result, field) => {
+      if (err) {
+        res.sendStatus(503); // Could not connect to Database
+        return;
+      }
+      if (result.rows.length) {
+        res.sendStatus(409); // User already exists
+        return;
+      } else {
+        const sql = `UPDATE Users SET username = '${req.body.newUser}' WHERE username = '${req.body.oldUser}'`;
+        connection.query(sql, (err, result, field) => {
+          if (err) {
+            res.sendStatus(503);
+            return;
+          }
+          res.sendStatus(200);
+        });
+      }
+    });
+  } catch {
+    res.sendStatus(500);
+  }
+}
+
+module.exports.changePassword = async (req, res) => {
+  try {
+    // Check if user exists
+    connection.query(`SELECT id FROM Users WHERE username = '${req.user.username}'`, async (err, result, field) => {
+      if (err) {
+        res.sendStatus(503); // Could not connect to Database
+        return;
+      }
+      const hashPass = await bcrypt.hash(req.body.newPass, 10);
+      const sql = `UPDATE Users SET password = ${hashPass} WHERE username = ${req.user.username}`;
+      connection.query(sql, (err, result, field) => {
+        if (err) {
+          res.sendStatus(503);
+          return;
+        }
+        res.sendStatus(200);
+      });
+    });
+  } catch {
+    res.sendStatus(500);
+  }
+}
