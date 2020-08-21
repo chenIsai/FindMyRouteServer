@@ -180,8 +180,8 @@ module.exports.changeUsername = async (req, res) => {
         res.sendStatus(503); // Could not connect to Database
         return;
       }
-      if (result.rows.length) {
-        res.sendStatus(409); // User already exists
+      if (!result.rows.length) {
+        res.sendStatus(404); // User does not exists
         return;
       } else {
         const sql = `UPDATE Users SET username = '${req.body.newUser}' WHERE username = '${req.user.username}'`;
