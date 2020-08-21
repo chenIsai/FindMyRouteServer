@@ -61,7 +61,7 @@ module.exports.refreshToken = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   try {
-    connection.query(`SELECT * FROM Users WHERE username = '${req.user.username}'`, (err, result, field) => {
+    connection.query(`SELECT * FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503);
         return;
@@ -202,7 +202,7 @@ module.exports.changeUsername = async (req, res) => {
 module.exports.changePassword = async (req, res) => {
   try {
     // Check if user exists
-    connection.query(`SELECT id FROM Users WHERE username = '${req.user.username}'`, async (err, result, field) => {
+    connection.query(`SELECT id FROM Users WHERE id = '${req.user.id}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
         return;
@@ -212,7 +212,7 @@ module.exports.changePassword = async (req, res) => {
         return;
       }
       const hashPass = await bcrypt.hash(req.body.newPass, 10);
-      const sql = `UPDATE Users SET password = ${hashPass} WHERE username = ${req.user.username}`;
+      const sql = `UPDATE Users SET password = ${hashPass} WHERE id = ${req.user.id}`;
       connection.query(sql, (err, result, field) => {
         if (err) {
           res.sendStatus(503);
