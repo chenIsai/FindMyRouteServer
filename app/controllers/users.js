@@ -73,6 +73,8 @@ module.exports.getUser = (req, res) => {
         payload = {
           name: result.rows[0].name,
           username: result.rows[0].username,
+          routes: result.rows[0].total_routes,
+          distance: result.rows[0].total_distance,
         };
         res.status(200).json(payload);
       }
