@@ -48,7 +48,7 @@ module.exports.refreshToken = (req, res) => {
           return;
         }
         connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`);
-        const payload = {username: user.username}
+        const payload = {id: user.id}
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
         connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`);
@@ -87,7 +87,7 @@ module.exports.getUser = (req, res) => {
 module.exports.login = async (req, res) => {
   try {
     // Get hashed password to compare
-    connection.query(`SELECT password FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
+    connection.query(`SELECT id, password FROM Users WHERE username = '${req.body.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
         return;
@@ -99,7 +99,7 @@ module.exports.login = async (req, res) => {
         // If valid password, return payload
         if (await bcrypt.compare(req.body.password, result.rows[0].password)) {
           payload = {
-            username: req.body.username,
+            id: result.rows[0].id,
           };
           const accessToken = generateAccessToken(payload);
           const refreshToken = generateRefreshToken(payload);
@@ -134,12 +134,12 @@ module.exports.register = async (req, res) => {
       } else {
         // If non-existent, create new entry with req.body
         const hashPass = await bcrypt.hash(req.body.password, 10);
-        var sql = `INSERT INTO Users (username, password, name) VALUES ('${req.body.username}', '${hashPass}', '${req.body.name}')`
+        var sql = `INSERT INTO Users (username, password, name) VALUES ('${req.body.username}', '${hashPass}', '${req.body.name}') RETURNING id`
         connection.query(sql, (err, result) => {
           if (err) {
             res.sendStatus(500); // Error inserting user
           } else {
-            const payload = {username: req.body.username};
+            const payload = {id: req.rows[0].id};
             const accessToken = generateAccessToken(payload);
             const refreshToken = generateRefreshToken(payload);
             res.status(201).json({accessToken, refreshToken}); // Successfully added
