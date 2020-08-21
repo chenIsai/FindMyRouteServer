@@ -184,7 +184,7 @@ module.exports.changeUsername = async (req, res) => {
         res.sendStatus(404); // User does not exists
         return;
       } else {
-        const sql = `UPDATE Users SET username = '${req.body.username}', name = '${req.body.name}' WHERE username = '${req.user.id}'`;
+        const sql = `UPDATE Users SET username = '${req.body.username}', name = '${req.body.name}' WHERE id = '${req.user.id}'`;
         connection.query(sql, (err, result, field) => {
           if (err) {
             res.sendStatus(503);
