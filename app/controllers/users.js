@@ -175,7 +175,7 @@ module.exports.logout = (req, res) => {
 module.exports.changeUsername = async (req, res) => {
   try {
     // Check if username has already been used
-    connection.query(`SELECT id FROM Users WHERE username = '${req.body.oldUser}'`, async (err, result, field) => {
+    connection.query(`SELECT id FROM Users WHERE username = '${req.user.username}'`, async (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
         return;
@@ -184,7 +184,7 @@ module.exports.changeUsername = async (req, res) => {
         res.sendStatus(409); // User already exists
         return;
       } else {
-        const sql = `UPDATE Users SET username = '${req.body.newUser}' WHERE username = '${req.body.oldUser}'`;
+        const sql = `UPDATE Users SET username = '${req.body.newUser}' WHERE username = '${req.user.username}'`;
         connection.query(sql, (err, result, field) => {
           if (err) {
             res.sendStatus(503);
