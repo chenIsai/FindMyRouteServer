@@ -139,7 +139,7 @@ module.exports.register = async (req, res) => {
           if (err) {
             res.sendStatus(500); // Error inserting user
           } else {
-            const payload = {id: req.rows[0].id};
+            const payload = {id: result.rows[0].id};
             const accessToken = generateAccessToken(payload);
             const refreshToken = generateRefreshToken(payload);
             res.status(201).json({accessToken, refreshToken}); // Successfully added
