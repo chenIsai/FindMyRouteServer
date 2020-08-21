@@ -212,7 +212,7 @@ module.exports.changePassword = async (req, res) => {
         return;
       }
       const hashPass = await bcrypt.hash(req.body.newPass, 10);
-      const sql = `UPDATE Users SET password = ${hashPass} WHERE id = ${req.user.id}`;
+      const sql = `UPDATE Users SET password = '${hashPass}' WHERE id = '${req.user.id}'`;
       connection.query(sql, (err, result, field) => {
         if (err) {
           res.sendStatus(503);
