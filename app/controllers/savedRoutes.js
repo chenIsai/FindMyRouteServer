@@ -32,14 +32,15 @@ module.exports.saveRoute = (req, res) => {
         return;
       }
       const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${req.user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`;
+      console.log(saveSql);
       connection.query(saveSql, (err) => {
         if (err) {
           res.sendStatus(400);
           return;
         }
+        connection.query(`UPDATE Users SET total_routes = total_routes + 1 WHERE username = '${req.user.username}'`);
         res.sendStatus(200);
       });
-      connection.query(`UPDATE Users SET total_routes = total_routes + 1 WHERE username = '${req.user.username}'`);
     });
   } catch {
     res.sendStatus(500);
