@@ -31,14 +31,13 @@ module.exports.saveRoute = (req, res) => {
         res.sendStatus(409); // Route name already exists
         return;
       }
-      const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${req.user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`;
-      console.log(req.user);
+      const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${req.user.id}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`;
       connection.query(saveSql, (err) => {
         if (err) {
           res.sendStatus(400);
           return;
         }
-        connection.query(`UPDATE Users SET total_routes = total_routes + 1 WHERE username = '${req.user.username}'`);
+        connection.query(`UPDATE Users SET total_routes = total_routes + 1 WHERE id = '${req.user.id}'`);
         res.sendStatus(200);
       });
     });
@@ -65,7 +64,7 @@ module.exports.deleteRoute = (req, res) => {
   try {
     const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${req.user.id}' AND name = '${req.body.name}'`
     connection.query(sql);
-    connection.query(`UPDATE Users SET total_routes = total_routes - 1 WHERE username = '${req.user.username}'`);
+    connection.query(`UPDATE Users SET total_routes = total_routes - 1 WHERE id = '${req.user.id}'`);
     res.sendStatus(200);
   } catch {
     res.sendStatus(500);
@@ -76,7 +75,7 @@ module.exports.deleteALL = (req, res) => {
   try {
     const sql = `DELETE FROM SavedRoutes WHERE owned_by = '${req.user.id}'`;
     connection.query(sql);
-    connection.query(`UPDATE Users SET total_routes = 0 WHERE username = '${req.user.username}'`);
+    connection.query(`UPDATE Users SET total_routes = 0 WHERE id = '${req.user.id}'`);
     res.sendStatus(200);
   } catch {
     res.sendStatus(500);
