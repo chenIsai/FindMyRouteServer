@@ -32,7 +32,7 @@ module.exports.saveRoute = (req, res) => {
         return;
       }
       const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, markers, route) VALUES ('${req.user.username}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.markers}', '${req.body.route}')`;
-      console.log(saveSql);
+      console.log(req.user);
       connection.query(saveSql, (err) => {
         if (err) {
           res.sendStatus(400);
