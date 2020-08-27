@@ -19,7 +19,7 @@ module.exports.authenticateToken = (req, res, next) => {
   })
 }
 
-module.exports.saveRoute = (req, res) => {
+module.exports.plannedRoute = (req, res) => {
   try {
     const sql = `SELECT name FROM SavedRoutes WHERE owned_by = '${req.user.id}' AND name = '${req.body.name}'`
     connection.query(sql, (err, result, field) => {
@@ -99,6 +99,33 @@ module.exports.edit = (req, res) => {
           res.sendStatus(503);
           return;
         }
+        res.sendStatus(200);
+      });
+    });
+  } catch {
+    res.sendStatus(500);
+  }
+}
+
+module.exports.ranRoute = (req, res) => {
+  try {
+    const sql = `SELECT name FROM SavedRoutes WHERE owned_by = '${req.user.id}' AND name = '${req.body.name}'`
+    connection.query(sql, (err, result, field) => {
+      if (err) {
+        res.status(400).send(err);
+        return;
+      }
+      if (result.rows.length) {
+        res.sendStatus(409); // Route name already exists
+        return;
+      }
+      const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, route) VALUES ('${req.user.id}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.route}')`;
+      connection.query(saveSql, (err) => {
+        if (err) {
+          res.sendStatus(400);
+          return;
+        }
+        connection.query(`UPDATE Users SET total_routes = total_routes + 1, total_distance = total_distance + ${req.body.distance} WHERE id = '${req.user.id}'`);
         res.sendStatus(200);
       });
     });
