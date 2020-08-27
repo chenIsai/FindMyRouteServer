@@ -142,6 +142,7 @@ module.exports.register = async (req, res) => {
             const payload = {id: result.rows[0].id};
             const accessToken = generateAccessToken(payload);
             const refreshToken = generateRefreshToken(payload);
+            connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`)
             res.status(201).json({accessToken, refreshToken}); // Successfully added
           }
         })
