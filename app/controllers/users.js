@@ -104,7 +104,7 @@ module.exports.login = async (req, res) => {
           const accessToken = generateAccessToken(payload);
           const refreshToken = generateRefreshToken(payload);
           connection.query(`DELETE FROM RefreshTokens WHERE id = ${result.rows[0].id}`);
-          connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`, (err, result) => {
+          connection.query(`INSERT INTO RefreshTokens (value, id) VALUES ('${refreshToken}', ${result.rows[0].id})`, (err, result) => {
             if (err) {
               res.sendStatus(503);
               return;
@@ -143,7 +143,7 @@ module.exports.register = async (req, res) => {
             const payload = {id: result.rows[0].id};
             const accessToken = generateAccessToken(payload);
             const refreshToken = generateRefreshToken(payload);
-            connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`)
+            connection.query(`INSERT INTO RefreshTokens (value, id) VALUES ('${refreshToken}', ${result.rows[0].id})`);
             res.status(201).json({accessToken, refreshToken}); // Successfully added
           }
         })
