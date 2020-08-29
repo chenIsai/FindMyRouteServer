@@ -12,5 +12,6 @@ router.post("/token", controller.refreshToken);
 router.delete("/logout", controller.logout);
 router.post("/edit/username", controller.changeUsername);
 router.post("/edit/password", controller.changePassword);
+router.delete("/delete", controller.deleteUser);
 
 module.exports = router;

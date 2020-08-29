@@ -51,7 +51,7 @@ module.exports.refreshToken = (req, res) => {
         const payload = {id: user.id}
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
-        connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`);
+        connection.query(`INSERT INTO RefreshTokens (value, id) VALUES ('${refreshToken}', '${user.id}')`);
         res.status(200).json({accessToken, refreshToken});
       })
     }
@@ -103,6 +103,7 @@ module.exports.login = async (req, res) => {
           };
           const accessToken = generateAccessToken(payload);
           const refreshToken = generateRefreshToken(payload);
+          connection.query(`DELETE FROM RefreshTokens WHERE id = ${result.rows[0].id}`);
           connection.query(`INSERT INTO RefreshTokens (value) VALUES ('${refreshToken}')`, (err, result) => {
             if (err) {
               res.sendStatus(503);
@@ -173,10 +174,10 @@ module.exports.logout = (req, res) => {
   }
 }
 
-module.exports.changeUsername = async (req, res) => {
+module.exports.changeUsername = (req, res) => {
   try {
     // Check if username has already been used
-    connection.query(`SELECT id FROM Users WHERE id = '${req.user.id}'`, async (err, result, field) => {
+    connection.query(`SELECT id FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503); // Could not connect to Database
         return;
@@ -221,6 +222,29 @@ module.exports.changePassword = async (req, res) => {
         }
         res.sendStatus(200);
       });
+    });
+  } catch {
+    res.sendStatus(500);
+  }
+}
+
+module.exports.deleteUser = (req, res) => {
+  try {
+    connection.query(`SELECT ID FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
+      if (err) {
+        res.sendStatus(503);
+        return;
+      }
+      if (!result.rows.length) {
+        res.sendStatus(404);
+        return;
+      }
+      const removeUser = `DELETE FROM Users WHERE id = ${req.user.id}`;
+      const removeRoutes = `DELETE FROM SavedRoutes WHERE owned_by = '${req.user.id}'`;
+      const removeRefresh = `DELETE FROM RefreshTokens WHERE id = ${req.user.id}`;
+      connection.query(removeUser);
+      connection.query(removeRoutes);
+      res.sendStatus(200);
     });
   } catch {
     res.sendStatus(500);
