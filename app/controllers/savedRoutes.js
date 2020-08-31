@@ -119,10 +119,9 @@ module.exports.ranRoute = (req, res) => {
         res.sendStatus(409); // Route name already exists
         return;
       }
-      const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, route) VALUES ('${req.user.id}', '${req.body.name}', '${req.body.distance}', '${req.body.description}', '${req.body.route}')`;
+      const saveSql = `INSERT INTO SavedRoutes (owned_by, name, distance, description, route) VALUES ('${req.user.id}', '${req.body.name}', ${req.body.distance}, '${req.body.description}', '${req.body.route}')`;
       connection.query(saveSql, (err) => {
         if (err) {
-          console.log(err);
           res.sendStatus(400);
           return;
         }
