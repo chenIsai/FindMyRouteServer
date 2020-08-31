@@ -246,7 +246,8 @@ module.exports.deleteUser = (req, res) => {
       connection.query(removeRoutes);
       res.sendStatus(200);
     });
-  } catch {
+  } catch (e) => {
+    console.log(e);
     res.sendStatus(500);
   }
 }
