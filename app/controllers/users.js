@@ -230,7 +230,7 @@ module.exports.changePassword = async (req, res) => {
 
 module.exports.deleteUser = (req, res) => {
   try {
-    connection.query(`SELECT ID FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
+    connection.query(`SELECT id FROM Users WHERE id = '${req.user.id}'`, (err, result, field) => {
       if (err) {
         res.sendStatus(503);
         return;
@@ -246,7 +246,7 @@ module.exports.deleteUser = (req, res) => {
       connection.query(removeRoutes);
       res.sendStatus(200);
     });
-  } catch (e) => {
+  } catch (e) {
     console.log(e);
     res.sendStatus(500);
   }
