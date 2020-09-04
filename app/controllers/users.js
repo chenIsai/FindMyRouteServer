@@ -21,7 +21,7 @@ module.exports.authenticateToken = (req, res, next) => {
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
-      return res.sendStatus(403)
+      return res.sendStatus(401)
     }
     req.user = user;
     next();
@@ -39,12 +39,12 @@ module.exports.refreshToken = (req, res) => {
       return;
     }
     if (!result.rows.length) {
-    res.sendStatus(403);
-    return;
+      res.sendStatus(401);
+      return;
     } else {
       jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) {
-          res.sendStatus(403);
+          res.sendStatus(401);
           return;
         }
         connection.query(`DELETE FROM RefreshTokens WHERE value = '${token}'`);
